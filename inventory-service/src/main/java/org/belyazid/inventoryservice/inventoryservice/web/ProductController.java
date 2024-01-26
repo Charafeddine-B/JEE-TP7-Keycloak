@@ -2,6 +2,7 @@ package org.belyazid.inventoryservice.inventoryservice.web;
 
 import org.belyazid.inventoryservice.inventoryservice.entities.Product;
 import org.belyazid.inventoryservice.inventoryservice.repositories.ProductRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,6 +17,7 @@ public class ProductController {
     }
 
     @GetMapping("/products")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<Product> products(){
         return productRepository.findAll();
     }
