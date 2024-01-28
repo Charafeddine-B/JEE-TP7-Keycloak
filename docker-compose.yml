@@ -25,9 +25,9 @@ services:
       PMA_HOST: mysql-db-inventory
       PMA_PORT: 3306
       PMA_ARBITRARY: 1
-  emsi-inventory-service:
+  inventory-service:
     build: ./inventory-service
-    container_name: emsi-inventory-service
+    container_name: inventory-service
     ports:
       - '8098:8098'
     expose:
@@ -38,8 +38,6 @@ services:
         condition : service_healthy
     environment:
       - DB_URL=jdbc:mysql://mysql-db-inventory:3306/inventory-db
-
-
   postgres-service:
     image: postgres
     container_name: postgres-service
@@ -66,6 +64,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: 1234
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     environment:
@@ -84,7 +83,25 @@ services:
       - '8080'
     depends_on:
       postgres-service:
-        condition: service_health
+        condition: service_healthy
+  customer-service-thymeleaf:
+    build: ./customer-front-thymleaf-app
+    container_name: customer-service-thymeleaf
+    ports:
+      - '8090:8090'
+    expose:
+      - '8090'
+    restart: always
+    depends_on:
+      - keycloak
+    environment:
+      - KEYCLOAK_REDIRECT_URL=http://localhost:8090/login/oauth2/code/sdia-customer-client
+      - KEYCLOAK_ISSUER_URL=http://keycloak:8080/realms/sdia-app
+      - KEYCLOAK_AUTH=http://localhost:8080/realms/sdia-app/protocol/openid-connect/auth
+      - KEYCLOAK_AUTH_TOKEN=http://localhost:8080/realms/sdia-app/protocol/openid-connect/token
+      - JWT_JWK_SET_URI=http://keycloak:8080/realms/sdia-app/protocol/openid-connect/certs
+      - INVENTORY_SERVICE_BASE_URI=http://inventory-service:8098
+
 volumes:
   mysql_data:
   postgres_data:
