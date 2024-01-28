@@ -101,6 +101,15 @@ services:
       - KEYCLOAK_AUTH_TOKEN=http://localhost:8080/realms/sdia-app/protocol/openid-connect/token
       - JWT_JWK_SET_URI=http://keycloak:8080/realms/sdia-app/protocol/openid-connect/certs
       - INVENTORY_SERVICE_BASE_URI=http://inventory-service:8098
+  angular-front:
+    build: ./angular-front-app
+    container_name: angular-front
+    ports:
+      - '8085:80'
+    expose:
+      - '8085'
+    restart: always
+  
 
 volumes:
   mysql_data:
